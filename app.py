@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import sqlite3
+import os
 
 app = Flask(__name__)
 
@@ -50,3 +51,4 @@ def home():
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
+application = app
