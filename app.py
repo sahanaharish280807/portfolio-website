@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 import os
 
@@ -46,7 +46,7 @@ def view_data():
 
 @app.route('/')
 def home():
-    return "Home Page Working"
+    return render_template('index.html')
 
 if __name__ == '__main__':
     init_db()
