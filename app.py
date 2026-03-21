@@ -6,6 +6,7 @@ app = Flask(__name__)
 def init_db():
     conn = sqlite3.connect('database.db')
     conn.execute('CREATE TABLE IF NOT EXISTS contacts (id INTEGER PRIMARY KEY, name TEXT, email TEXT, message TEXT)')
+    conn.commit()
     conn.close()
 
 @app.route('/submit', methods=['POST'])
@@ -21,6 +22,22 @@ def submit():
     conn.close()
 
     return "Message Stored Successfully!"
+
+@app.route('/view')
+def view():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.execute("SELECT * FROM contacts")
+
+    data = ""
+    for row in cursor:
+        data += f"Name: {row[0]}, Email: {row[1]}, Message: {row[2]}<br>"
+
+    conn.close()
+    return data
+
+@app.route('/')
+def home():
+    return "Home Page Working"
 
 if __name__ == '__main__':
     init_db()
