@@ -35,6 +35,14 @@ def view():
     conn.close()
     return data
 
+@app.route('/view-data')
+def view_data():
+    conn = sqlite3.connnect('database.db')
+    cursor = conn.execute("SELECT * FROM contacts")
+    data = cursor.fetchall()
+    conn.close()
+    return jsonify(data)
+
 @app.route('/')
 def home():
     return "Home Page Working"
