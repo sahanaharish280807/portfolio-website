@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 # Use /tmp for database on Render
-DATABASE_PATH = '/tmp/database.db'
+DATABASE_PATH = '/home/sahanaharish280807/database.db'
 
 def init_db():
     conn = sqlite3.connect(DATABASE_PATH)
@@ -56,8 +56,7 @@ def home():
 # Initialize database
 init_db()
 
-# For Render
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
-
 application = app
+
+if __name__ == '__main__':
+    app.run(debug=True)
