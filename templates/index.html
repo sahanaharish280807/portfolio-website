@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sahana Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h2>Sahana</h2>
+    <div>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+    </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="hero-text">
+        <h1><span class="pink">Sahana</span> Harish</h1>
+        <p>Full Stack Developer</p>
+        <p class="desc">
+            I build clean and interactive web applications with modern technologies.
+        </p>
+        <a href="{{ url_for('static', filename='resume.pdf') }}" target="_blank">
+    <button class="btn">View Resume</button>
+        </a>
+        <button class="btn-outline">Contact Me</button>
+    </div>
+
+    <div class="hero-img">
+        <img src="https://cdn-icons-png.flaticon.com/512/6997/6997662.png">
+    </div>
+</div>
+
+<!-- About -->
+<div class="section" id="about">
+    <h2>💖 About Me</h2>
+    <p>
+        I'm a passionate developer who enjoys creating aesthetic and functional
+        web applications. I love learning new technologies and building projects.
+    </p>
+</div>
+
+<!-- Projects -->
+<div class="section" id="projects">
+    <h2>💖 My Projects</h2>
+    <div class="cards">
+        <div class="card">
+            <h3>Notes App</h3>
+            <p>Save notes with cloud storage</p>
+            <button>View Project</button>
+        </div>
+
+        <div class="card">
+            <h3>Expense Tracker</h3>
+            <p>Track your daily expenses</p>
+            <button>View Project</button>
+        </div>
+    </div>
+</div>
+
+<!-- Skills (ONLY ONCE ✅) -->
+<div class="section" id="skills">
+    <h2>💡 Skills & Expertise</h2>
+    <div class="skills">
+        <span>Python</span>
+        <span>Flask</span>
+        <span>HTML</span>
+        <span>CSS</span>
+        <span>JavaScript</span>
+    </div>
+</div>
+
+<!-- Chat -->
+<div class="chat-box">
+    <div class="chat-header">💬 Chat with me</div>
+    <div id="chat"></div>
+    <input id="msg" placeholder="Ask me anything...">
+    <button onclick="sendMsg()">➤</button>
+</div>
+
+<script>
+function sendMsg() {
+    let msg = document.getElementById("msg").value;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: msg})
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("chat").innerHTML += 
+        "<p><b>You:</b> "+msg+"</p>" +
+        "<p><b>AI:</b> "+data.reply+"</p>";
+    });
+}
+</script>
+
+</body>
+</html>
