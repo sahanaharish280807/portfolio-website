@@ -20,15 +20,54 @@
 <!-- Hero -->
 <div class="hero">
     <div class="hero-text">
-        <h1><span class="pink">Sahana</span> Harish</h1>
-        <p>Full Stack Developer</p>
+        <div class="greeting">✨ Hello, I'm</div>
+        <h1>Sahana <span class="gradient-text">Harish</span></h1>
+        <div class="typing-wrapper">
+            <span class="typed-text"></span><span class="cursor">|</span>
+        </div>
         <p class="desc">
-            I build clean and interactive web applications with modern technologies.
+            I craft beautiful web experiences that combine elegant design with powerful functionality.
+            Let's bring your ideas to life!
         </p>
-        <a href="/static/resume.pdf" download class="btn" style="text-decoration: none; display: inline-block;">📄 Download Resume</a>
-        <a href="#contact" class="btn-outline" style="text-decoration: none; display: inline-block;">💼 Hire Me</a>
+        
+        <div class="btn-group-hero">
+            <a href="/static/resume.pdf" download class="btn-primary-glow">
+                📄 Download Resume <span class="btn-arrow">→</span>
+            </a>
+            <a href="#contact" class="btn-outline-glow">
+                💼 Hire Me <span class="btn-arrow">→</span>
+            </a>
+        </div>
+        
+        <div class="social-links">
+            <a href="#" class="social-icon">🐙 GitHub</a>
+            <a href="#" class="social-icon">💼 LinkedIn</a>
+            <a href="#" class="social-icon">🐦 Twitter</a>
+        </div>
     </div>
 
+    <div class="hero-img">
+        <div class="floating-card">
+            <div class="code-icon">💻</div>
+            <div class="stat">
+                <span class="number">20+</span>
+                <span class="label">Projects</span>
+            </div>
+            <div class="stat">
+                <span class="number">3+</span>
+                <span class="label">Years</span>
+            </div>
+        </div>
+        <div class="hero-avatar">
+            <div class="avatar-ring">
+                <img src="https://cdn-icons-png.flaticon.com/512/6997/6997662.png" alt="Sahana">
+            </div>
+        </div>
+        <div class="tech-badge python">🐍 Python</div>
+        <div class="tech-badge flask">🌶️ Flask</div>
+        <div class="tech-badge react">⚛️ React</div>
+    </div>
+</div>
     <div class="hero-img">
         <img src="https://cdn-icons-png.flaticon.com/512/6997/6997662.png">
     </div>
@@ -203,6 +242,22 @@ function sendMessage(event) {
     }).catch(err => console.log("Form submitted"));
 }
 </script>
+<script>
+// Rotating text animation
+const rotatingText = document.querySelector('.rotating-text');
+const roles = ['Full Stack Developer', 'UI Enthusiast', 'Problem Solver', 'Creative Thinker'];
+let roleIndex = 0;
 
+function rotateRole() {
+    roleIndex = (roleIndex + 1) % roles.length;
+    rotatingText.style.opacity = '0';
+    setTimeout(() => {
+        rotatingText.textContent = roles[roleIndex];
+        rotatingText.style.opacity = '1';
+    }, 300);
+}
+
+setInterval(rotateRole, 3000);
+</script>
 </body>
 </html>
