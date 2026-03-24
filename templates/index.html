@@ -27,7 +27,7 @@
         <a href="{{ url_for('static', filename='resume.pdf') }}" target="_blank">
     <button class="btn">View Resume</button>
         </a>
-        <button class="btn btn-primary" onclick="window.location.href='/static/resume.pdf'">📄 Download Resume</button>
+        <a href="/static/resume.pdf" download class="btn btn-primary" style="text-decoration: none;">📄 Download Resume</a>
         <button class="btn-outline">Contact Me</button>
     </div>
 
