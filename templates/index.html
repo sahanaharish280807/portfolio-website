@@ -27,8 +27,10 @@
         <a href="{{ url_for('static', filename='resume.pdf') }}" target="_blank">
     <button class="btn">View Resume</button>
         </a>
-        <a href="/static/resume.pdf" download class="btn btn-primary" style="text-decoration: none;">📄 Download Resume</a>
-        <button class="btn-outline">Contact Me</button>
+        <a href="/static/resume.pdf" download class="btn" style="text-decoration:none; display:inline-block;">
+            📄 Download Resume</a>
+        <button class="btn-outline" onclick="alert('📧 Contact: sahana@example.com')">
+            ✉️ Contact Me</button>
     </div>
 
     <div class="hero-img">
