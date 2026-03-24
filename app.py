@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import traceback
+import os
 
 app = Flask(__name__)
 
@@ -14,6 +15,12 @@ def home():
 def chat():
     try:
         msg = request.json.get("message").lower()
+
+        msg = request.json.get("message").lower()
+
+    with open("chat_log.txt", "a") as f:
+        f.write(msg + "\n")
+
         print(f"Received message: {msg}")  # This will show in terminal
 
         if "project" in msg:
@@ -38,11 +45,53 @@ def contact():
     email = data.get("email")
     subject = data.get("subject")
     message = data.get("message")
+
+    with open("contact_data.txt", "a") as f:
+        f.write(f"{name}, {email}, {subject}, {message}\n")
     
     # Print to console (you can save to database or send email)
     print(f"New message from {name} ({email}): {subject} - {message}")
     
-    return jsonify({"status": "success", "message": "Message received!"})    
+    return jsonify({"status": "success", "message": "Message received!"})
 
+@app.route("/view-data")
+def view_data():
+    chat_content = ""
+    contact_content = ""
+    
+    if os.path.exists("chat_log.txt"):
+        with open("chat_log.txt", "r") as f:
+            chat_content = f.read()
+    
+    if os.path.exists("contact_data.txt"):
+        with open("contact_data.txt", "r") as f:
+            contact_content = f.read()
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>View Data</title>
+        <style>
+            body {{ font-family: Arial; padding: 20px; background: #f5f5f5; }}
+            .section {{ background: white; padding: 20px; margin: 20px 0; border-radius: 10px; }}
+            h2 {{ color: #667eea; }}
+            pre {{ background: #f0f0f0; padding: 15px; overflow-x: auto; }}
+        </style>
+    </head>
+    <body>
+        <h1>📊 Portfolio Data</h1>
+        <div class="section">
+            <h2>💬 Chat Messages</h2>
+            <pre>{chat_content or "No messages yet"}</pre>
+        </div>
+        <div class="section">
+            <h2>📧 Contact Form</h2>
+            <pre>{contact_content or "No messages yet"}</pre>
+        </div>
+        <a href="/">← Back</a>
+    </body>
+    </html>
+    """    
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)
