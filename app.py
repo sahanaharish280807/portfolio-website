@@ -4,24 +4,25 @@ import os
 
 app = Flask(__name__)
 
+# ---------------- HOME PAGE ----------------
 @app.route("/")
 def home():
     try:
         return render_template("index.html")
     except Exception as e:
-        return f"Error loading template: {e}<br>Check that templates/index.html exists"
+        return f"Error loading template: {e}<br>Check templates/index.html exists"
 
+
+# ---------------- CHAT BOT ----------------
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
         msg = request.json.get("message").lower()
+        print(f"Received message: {msg}")
 
-        msg = request.json.get("message").lower()
-
-    with open("chat_log.txt", "a") as f:
-        f.write(msg + "\n")
-
-        print(f"Received message: {msg}")  # This will show in terminal
+        # ✅ Save chat message
+        with open("chat_log.txt", "a") as f:
+            f.write(msg + "\n")
 
         if "project" in msg:
             reply = "I built a Notes App, Expense Tracker, and Portfolio Website."
@@ -30,43 +31,57 @@ def chat():
         elif "about" in msg:
             reply = "I'm Sahana, a Full Stack Developer who loves clean UI and web apps."
         else:
-            reply = "Hi! I'm Sahana 💖 Ask me about my projects or skills!"
+            reply = "Hi! I'm Sahana ❤️ Ask me about my projects or skills!"
 
         return jsonify({"reply": reply})
+
     except Exception as e:
         print(f"Error in chat: {e}")
         traceback.print_exc()
         return jsonify({"reply": f"Error: {str(e)}"})
-    
+
+
+# ---------------- CONTACT FORM ----------------
 @app.route("/contact", methods=["POST"])
 def contact():
-    data = request.json
-    name = data.get("name")
-    email = data.get("email")
-    subject = data.get("subject")
-    message = data.get("message")
+    try:
+        data = request.json
 
-    with open("contact_data.txt", "a") as f:
-        f.write(f"{name}, {email}, {subject}, {message}\n")
-    
-    # Print to console (you can save to database or send email)
-    print(f"New message from {name} ({email}): {subject} - {message}")
-    
-    return jsonify({"status": "success", "message": "Message received!"})
+        name = data.get("name")
+        email = data.get("email")
+        subject = data.get("subject")
+        message = data.get("message")
 
+        # ✅ Save contact data
+        with open("contact_data.txt", "a") as f:
+            f.write(f"{name}, {email}, {subject}, {message}\n")
+
+        print(f"New message from {name} ({email}): {subject} - {message}")
+
+        return jsonify({"status": "success", "message": "Message received!"})
+
+    except Exception as e:
+        print(f"Error in contact: {e}")
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)})
+
+
+# ---------------- VIEW DATA PAGE ----------------
 @app.route("/view-data")
 def view_data():
     chat_content = ""
     contact_content = ""
-    
+
+    # Read chat data
     if os.path.exists("chat_log.txt"):
         with open("chat_log.txt", "r") as f:
             chat_content = f.read()
-    
+
+    # Read contact data
     if os.path.exists("contact_data.txt"):
         with open("contact_data.txt", "r") as f:
             contact_content = f.read()
-    
+
     return f"""
     <!DOCTYPE html>
     <html>
@@ -81,17 +96,21 @@ def view_data():
     </head>
     <body>
         <h1>📊 Portfolio Data</h1>
+
         <div class="section">
             <h2>💬 Chat Messages</h2>
             <pre>{chat_content or "No messages yet"}</pre>
         </div>
+
         <div class="section">
-            <h2>📧 Contact Form</h2>
+            <h2>📩 Contact Form</h2>
             <pre>{contact_content or "No messages yet"}</pre>
         </div>
-        <a href="/">← Back</a>
     </body>
     </html>
-    """    
+    """
+
+
+# ---------------- RUN APP ----------------
 if __name__ == "__main__":
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    app.run(debug=True)
