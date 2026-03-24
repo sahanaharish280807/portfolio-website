@@ -30,6 +30,19 @@ def chat():
         print(f"Error in chat: {e}")
         traceback.print_exc()
         return jsonify({"reply": f"Error: {str(e)}"})
+    
+@app.route("/contact", methods=["POST"])
+def contact():
+    data = request.json
+    name = data.get("name")
+    email = data.get("email")
+    subject = data.get("subject")
+    message = data.get("message")
+    
+    # Print to console (you can save to database or send email)
+    print(f"New message from {name} ({email}): {subject} - {message}")
+    
+    return jsonify({"status": "success", "message": "Message received!"})    
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)

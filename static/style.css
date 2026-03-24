@@ -1,113 +1,233 @@
-body {
-    font-family: 'Segoe UI';
-    margin: 0;
-    background: linear-gradient(to right, #fff5f7, #ffeef3);
+/* Add these new styles to your existing CSS */
+
+/* About Section - Creative Cards */
+.about-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
 }
 
-/* Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px 50px;
+.about-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+    padding: 1.8rem;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
-/* Hero */
-.hero {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 50px;
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
 }
 
-.hero-text {
-    max-width: 400px;
+.about-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
 }
 
-.pink {
-    color: #ff6b81;
+.about-card h3 {
+    color: #667eea;
+    margin-bottom: 0.8rem;
+    font-size: 1.3rem;
 }
 
-.desc {
+.about-card p {
     color: #666;
+    line-height: 1.6;
+    font-size: 0.9rem;
 }
 
-.hero-img img {
-    width: 220px;
+/* Contact Section */
+.contact-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1rem;
 }
 
-/* Buttons */
-.btn {
-    background: #ff6b81;
+.contact-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.contact-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255,255,255,0.1);
+    padding: 1rem;
+    border-radius: 15px;
+    transition: transform 0.3s;
+}
+
+.info-item:hover {
+    transform: translateX(5px);
+    background: rgba(255,255,255,0.2);
+}
+
+.info-icon {
+    font-size: 2rem;
+}
+
+.info-item h4 {
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+}
+
+.info-item p {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.contact-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #667eea;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 10px;
     border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
-.btn-outline {
-    border: 1px solid #ff6b81;
-    padding: 10px;
-    border-radius: 10px;
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
-/* Sections */
-.section {
-    text-align: center;
-    padding: 40px;
-}
-
-/* Cards */
+/* Update project cards */
 .cards {
     display: flex;
+    gap: 2rem;
     justify-content: center;
-    gap: 20px;
+    flex-wrap: wrap;
 }
 
 .card {
     background: white;
-    padding: 20px;
-    border-radius: 15px;
-    width: 220px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-/* Skills */
-.skills span {
-    background: #ffe4ea;
-    padding: 10px;
-    margin: 5px;
+    padding: 1.8rem;
     border-radius: 20px;
-    display: inline-block;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    width: 280px;
+    transition: transform 0.3s;
 }
 
-/* Chat */
-.chat-box {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 260px;
-    background: white;
-    padding: 10px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
 }
 
-#chat {
-    height: 120px;
-    overflow-y: auto;
-    font-size: 14px;
+.card h3 {
+    color: #667eea;
+    margin-bottom: 0.8rem;
+    font-size: 1.3rem;
 }
 
-input {
-    width: 100%;
-    padding: 8px;
+.card p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 1rem;
 }
 
-button {
-    width: 100%;
-    margin-top: 5px;
-    background: #ff6b81;
+.card button {
+    background: #667eea;
     color: white;
     border: none;
-    padding: 8px;
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.card button:hover {
+    background: #764ba2;
+    transform: scale(1.05);
+}
+
+/* Skills section */
+.skills {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.skills span {
+    background: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
+    padding: 0.6rem 1.3rem;
+    border-radius: 30px;
+    color: #667eea;
+    font-weight: bold;
+    transition: transform 0.2s;
+    cursor: default;
+}
+
+.skills span:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .about-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-container {
+        grid-template-columns: 1fr;
+    }
 }
