@@ -109,7 +109,16 @@ def view_data():
     </body>
     </html>
     """
+@app.route('/data')
+def show_data():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
 
+    cursor.execute("SELECT * FROM contacts")
+    data = cursor.fetchall()
+
+    conn.close()
+    return str(data)
 
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
