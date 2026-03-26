@@ -1,0 +1,8 @@
+<h2>Submitted Data</h2>
+
+{% for item in data %}
+  <p><b>Name:</b> {{ item.name }}</p>
+  <p><b>Email:</b> {{ item.email }}</p>
+  <p><b>Message:</b> {{ item.message }}</p>
+  <hr>
+{% endfor %}
