@@ -65,7 +65,6 @@ def contact():
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)})
 
-
 # ---------------- VIEW DATA PAGE ----------------
 @app.route("/view-data")
 def view_data():
