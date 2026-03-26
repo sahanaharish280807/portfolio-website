@@ -65,6 +65,42 @@ def contact():
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)})
 
+@app.route('/submit', methods=['POST'])
+def submit():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    message = request.form.get('message')
+
+    # ✅ SAVE DATA
+    data_store.append({
+        "name": name,
+        "email": email,
+        "message": message
+    })
+
+    # ✅ SEND EMAIL
+    subject = "New Form Submission"
+    body = f"Name: {name}\nEmail: {email}\nMessage: {message}"
+
+    sender_email = "sanuharish007@gmail.com"
+    receiver_email = "your_email@gmail.com"
+    password = "Iphone_280807"
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.send_message(msg)
+        server.quit()
+        return "Submitted successfully!"
+    except Exception as e:
+        return f"Error: {e}"
+
 
 # ---------------- VIEW DATA PAGE ----------------
 @app.route("/view-data")
