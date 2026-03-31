@@ -154,11 +154,11 @@ def admin_dashboard():
         cursor = conn.cursor()
         
         # READ: Fetch all contacts
-        cursor.execute("SELECT * FROM contacts ORDER BY created_at DESC")
+        cursor.execute("SELECT * FROM contacts WHERE is_deleted=0 ORDER BY created_at DESC")
         contacts = cursor.fetchall()
         
         # READ: Fetch all chat messages
-        cursor.execute("SELECT * FROM chat_messages ORDER BY created_at DESC")
+        cursor.execute("SELECT * FROM chat_messages WHERE is_deleted=0 ORDER BY created_at DESC")
         chats = cursor.fetchall()
         
         conn.close()
@@ -215,7 +215,7 @@ def update_chat(id):
         
         # UPDATE: Modify chat message
         cursor.execute(
-            "UPDATE chat_messages SET message=? WHERE id=?",
+            ""UPDATE contacts SET name=?, email=?, subject=?, message=?, updated_at=CURRENT_TIMESTAMP WHERE id=?"",
             (data['message'], id)
         )
         conn.commit()
@@ -253,7 +253,7 @@ def view_data():
         chat_messages = cursor.fetchall()
         
         # READ: Fetch contact messages
-        cursor.execute("SELECT id, name, email, subject, message, created_at FROM contacts ORDER BY created_at DESC")
+        cursor.execute("SELECT id, name, email, subject, message, created_at FROM contacts WHERE is_deleted=0 ORDER BY created_at DESC")
         contacts = cursor.fetchall()
         
         conn.close()
