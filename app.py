@@ -178,7 +178,7 @@ def update_contact(id):
         
         # UPDATE: Modify contact message
         cursor.execute(
-            "UPDATE contacts SET name=?, email=?, subject=?, message=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
+            "UPDATE contacts SET name=?, email=?, subject=?, message=?, updated_at=CUR RENT_TIMESTAMP WHERE id=?",
             (data['name'], data['email'], data['subject'], data['message'], id)
         )
         conn.commit()
