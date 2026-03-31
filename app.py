@@ -215,7 +215,7 @@ def update_chat(id):
         
         # UPDATE: Modify chat message
         cursor.execute(
-            ""UPDATE contacts SET name=?, email=?, subject=?, message=?, updated_at=CURRENT_TIMESTAMP WHERE id=?"",
+            "UPDATE chat_messages SET message=? WHERE id=?",
             (data['message'], id)
         )
         conn.commit()
