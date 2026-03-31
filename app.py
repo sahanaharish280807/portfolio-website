@@ -713,17 +713,7 @@ ADMIN_TEMPLATE = """
 </body>
 </html>
 """
-# RUN THIS ONLY ONCE
-conn = sqlite3.connect("database.db")
-cursor = conn.cursor()
 
-cursor.execute("ALTER TABLE contacts ADD COLUMN updated_at TIMESTAMP")
-cursor.execute("ALTER TABLE contacts ADD COLUMN is_deleted INTEGER DEFAULT 0")
-
-conn.commit()
-conn.close()
-
-print("✅ Columns added successfully")
 
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
