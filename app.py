@@ -154,11 +154,11 @@ def admin_dashboard():
         cursor = conn.cursor()
         
         # READ: Fetch all contacts
-        cursor.execute("SELECT * FROM contacts WHERE is_deleted=0 ORDER BY created_at DESC")
+        cursor.execute("SELECT * FROM contacts WHERE ORDER BY created_at DESC")
         contacts = cursor.fetchall()
         
         # READ: Fetch all chat messages
-        cursor.execute("SELECT * FROM chat_messages WHERE is_deleted=0 ORDER BY created_at DESC")
+        cursor.execute("SELECT * FROM chat_messages WHERE ORDER BY created_at DESC")
         chats = cursor.fetchall()
         
         conn.close()
