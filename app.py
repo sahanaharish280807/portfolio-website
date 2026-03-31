@@ -2,8 +2,16 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, r
 import traceback
 import sqlite3
 import os
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'sanuharish007@gmail.com'
+app.config['MAIL_PASSWORD'] = 'feww ceob efsb vlsf'
+
+mail = Mail(app)
 
 # ---------------- DATABASE INITIALIZATION ----------------
 def init_db():
@@ -87,24 +95,21 @@ def chat():
         traceback.print_exc()
         return jsonify({"reply": f"Sorry, an error occurred. Please try again."}), 500
 
-# ---------------- CONTACT FORM (CREATE) ----------------
+# ---------------- CONTACT FORM (CREATE) ---------------- to save message. Please try again."}), 500
 @app.route("/contact", methods=["POST"])
 def contact():
     try:
         data = request.get_json()
-        if not data:
-            return jsonify({"status": "error", "message": "No data received"}), 400
 
         name = data.get("name")
         email = data.get("email")
-        subject = data.get("subject", "")
+        subject = data.get("subject", "New Message")
         message = data.get("message")
 
-        # Validate required fields
         if not name or not email or not message:
-            return jsonify({"status": "error", "message": "Name, email, and message are required"}), 400
+            return jsonify({"status": "error", "message": "All fields required"}), 400
 
-        # CREATE: Save contact data to database
+        # ✅ Save to DB
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         cursor.execute(
@@ -114,14 +119,31 @@ def contact():
         conn.commit()
         conn.close()
 
-        print(f"New message from {name} ({email}): {subject} - {message}")
+        # ✅ Send Email
+        msg = Message(
+            subject=f"Portfolio Message: {subject}",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[app.config['MAIL_USERNAME']]
+        )
 
-        return jsonify({"status": "success", "message": "Message received successfully!"})
+        msg.body = f"""
+New Contact Message
+
+Name: {name}
+Email: {email}
+Subject: {subject}
+
+Message:
+{message}
+        """
+
+        mail.send(msg)
+
+        return jsonify({"status": "success", "message": "Message sent successfully!"})
 
     except Exception as e:
-        print(f"Error in contact: {e}")
-        traceback.print_exc()
-        return jsonify({"status": "error", "message": "Failed to save message. Please try again."}), 500
+        print(e)
+        return jsonify({"status": "error", "message": "Something went wrong"}), 500
 
 # ---------------- READ ALL DATA (Admin Dashboard) ----------------
 @app.route("/admin")
@@ -156,7 +178,7 @@ def update_contact(id):
         
         # UPDATE: Modify contact message
         cursor.execute(
-            "UPDATE contacts SET name=?, email=?, subject=?, message=? WHERE id=?",
+            "UPDATE contacts SET name=?, email=?, subject=?, message=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
             (data['name'], data['email'], data['subject'], data['message'], id)
         )
         conn.commit()
@@ -174,7 +196,7 @@ def delete_contact(id):
         cursor = conn.cursor()
         
         # DELETE: Remove contact message
-        cursor.execute("DELETE FROM contacts WHERE id=?", (id,))
+        cursor.execute("UPDATE contacts SET is_deleted=1 WHERE id=?", (id,))
         conn.commit()
         conn.close()
         
@@ -691,6 +713,17 @@ ADMIN_TEMPLATE = """
 </body>
 </html>
 """
+# RUN THIS ONLY ONCE
+conn = sqlite3.connect("database.db")
+cursor = conn.cursor()
+
+cursor.execute("ALTER TABLE contacts ADD COLUMN updated_at TIMESTAMP")
+cursor.execute("ALTER TABLE contacts ADD COLUMN is_deleted INTEGER DEFAULT 0")
+
+conn.commit()
+conn.close()
+
+print("✅ Columns added successfully")
 
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
