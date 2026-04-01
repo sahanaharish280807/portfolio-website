@@ -5,11 +5,13 @@ import os
 from flask_mail import Mail, Message
 
 app = Flask(__name__)
+
+# Email configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'sanuharish007@gmail.com'
-app.config['MAIL_PASSWORD'] = 'feww ceob efsb vlsf'
+app.config['MAIL_PASSWORD'] = 'feww ceob efsb vlsf'  # IMPORTANT: Change this to use environment variables in production
 
 mail = Mail(app)
 
@@ -44,8 +46,10 @@ def init_db():
         conn.commit()
         conn.close()
         print("✅ Database initialized successfully!")
+        return True
     except Exception as e:
         print(f"❌ Database initialization error: {e}")
+        return False
 
 # Initialize database when app starts
 init_db()
@@ -56,7 +60,47 @@ def home():
     try:
         return render_template("index.html")
     except Exception as e:
-        return f"Error loading template: {e}<br>Check that templates/index.html exists"
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Portfolio - Home</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 50px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }}
+                .error-box {{
+                    background: rgba(255,255,255,0.9);
+                    color: #333;
+                    padding: 20px;
+                    border-radius: 10px;
+                    max-width: 600px;
+                    margin: 0 auto;
+                }}
+                a {{
+                    color: #667eea;
+                    text-decoration: none;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="error-box">
+                <h1>⚠️ Template Not Found</h1>
+                <p>Error loading index.html template: {e}</p>
+                <p>Make sure templates/index.html exists in your project folder.</p>
+                <hr>
+                <h3>Available Pages:</h3>
+                <p><a href="/admin">📊 Admin Dashboard</a></p>
+                <p><a href="/view-data">📝 View Data</a></p>
+                <p><a href="/debug/all">🔧 Debug Info</a></p>
+            </div>
+        </body>
+        </html>
+        """
 
 # ---------------- CHAT BOT (CREATE) ----------------
 @app.route("/chat", methods=["POST"])
@@ -95,7 +139,7 @@ def chat():
         traceback.print_exc()
         return jsonify({"reply": f"Sorry, an error occurred. Please try again."}), 500
 
-# ---------------- CONTACT FORM (CREATE) ---------------- to save message. Please try again."}), 500
+# ---------------- CONTACT FORM (CREATE) ----------------
 @app.route("/contact", methods=["POST"])
 def contact():
     try:
@@ -109,7 +153,7 @@ def contact():
         if not name or not email or not message:
             return jsonify({"status": "error", "message": "All fields required"}), 400
 
-        # ✅ Save to DB
+        # Save to Database
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
         cursor.execute(
@@ -117,17 +161,19 @@ def contact():
             (name, email, subject, message)
         )
         conn.commit()
+        contact_id = cursor.lastrowid
         conn.close()
 
-        # ✅ Send Email
-        msg = Message(
-            subject=f"Portfolio Message: {subject}",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=[app.config['MAIL_USERNAME']]
-        )
-
-        msg.body = f"""
-New Contact Message
+        # Send Email (with error handling so form doesn't fail if email fails)
+        email_status = "Not attempted"
+        try:
+            msg = Message(
+                subject=f"Portfolio Message: {subject}",
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[app.config['MAIL_USERNAME']]
+            )
+            msg.body = f"""
+New Contact Message (ID: {contact_id})
 
 Name: {name}
 Email: {email}
@@ -135,15 +181,27 @@ Subject: {subject}
 
 Message:
 {message}
-        """
 
-        mail.send(msg)
+Submitted at: {request.headers.get('User-Agent', 'Unknown')}
+            """
+            mail.send(msg)
+            email_status = "Email sent successfully"
+            print(f"✅ Email sent for contact ID: {contact_id}")
+        except Exception as email_err:
+            print(f"⚠️ Email error: {email_err}")
+            email_status = f"Email failed: {str(email_err)}"
 
-        return jsonify({"status": "success", "message": "Message sent successfully!"})
+        return jsonify({
+            "status": "success", 
+            "message": "Message saved successfully!",
+            "email_status": email_status,
+            "contact_id": contact_id
+        })
 
     except Exception as e:
-        print(e)
-        return jsonify({"status": "error", "message": "Something went wrong"}), 500
+        print(f"Error in contact: {e}")
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # ---------------- READ ALL DATA (Admin Dashboard) ----------------
 @app.route("/admin")
@@ -154,11 +212,11 @@ def admin_dashboard():
         cursor = conn.cursor()
         
         # READ: Fetch all contacts
-        cursor.execute("SELECT * FROM contacts WHERE is_deleted=0 ORDER BY created_at DESC")
+        cursor.execute("SELECT * FROM contacts ORDER BY created_at DESC")
         contacts = cursor.fetchall()
         
         # READ: Fetch all chat messages
-        cursor.execute("SELECT * FROM chat_messages WHERE is_deleted=0 ORDER BY created_at DESC")
+        cursor.execute("SELECT * FROM chat_messages ORDER BY created_at DESC")
         chats = cursor.fetchall()
         
         conn.close()
@@ -178,7 +236,7 @@ def update_contact(id):
         
         # UPDATE: Modify contact message
         cursor.execute(
-            "UPDATE contacts SET name=?, email=?, subject=?, message=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
+            "UPDATE contacts SET name=?, email=?, subject=?, message=? WHERE id=?",
             (data['name'], data['email'], data['subject'], data['message'], id)
         )
         conn.commit()
@@ -196,7 +254,7 @@ def delete_contact(id):
         cursor = conn.cursor()
         
         # DELETE: Remove contact message
-        cursor.execute("UPDATE contacts SET is_deleted=1 WHERE id=?", (id,))
+        cursor.execute("DELETE FROM contacts WHERE id=?", (id,))
         conn.commit()
         conn.close()
         
@@ -233,7 +291,7 @@ def delete_chat(id):
         cursor = conn.cursor()
         
         # DELETE: Remove chat message
-        cursor.execute("UPDATE chat_messages SET is_deleted=1 WHERE id=?", (id,))       
+        cursor.execute("DELETE FROM chat_messages WHERE id=?", (id,))
         conn.commit()
         conn.close()
         
@@ -253,7 +311,7 @@ def view_data():
         chat_messages = cursor.fetchall()
         
         # READ: Fetch contact messages
-        cursor.execute("SELECT id, name, email, subject, message, created_at FROM contacts WHERE is_deleted=0 ORDER BY created_at DESC")
+        cursor.execute("SELECT id, name, email, subject, message, created_at FROM contacts ORDER BY created_at DESC")
         contacts = cursor.fetchall()
         
         conn.close()
@@ -348,19 +406,6 @@ def view_data():
                 .nav a:hover {{
                     background: rgba(255,255,255,0.3);
                 }}
-                .admin-btn {{
-                    background: #ff6b6b;
-                    color: white;
-                    padding: 12px 24px;
-                    border: none;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    margin-top: 20px;
-                }}
-                .admin-btn:hover {{
-                    background: #ff5252;
-                }}
             </style>
         </head>
         <body>
@@ -445,6 +490,123 @@ def get_chat_messages():
         return jsonify({"status": "success", "data": messages_list})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+# ---------------- DEBUG ROUTES ----------------
+@app.route("/debug/all")
+def debug_all():
+    """Comprehensive debug information"""
+    import os
+    import datetime
+    
+    debug_info = []
+    
+    debug_info.append("<!DOCTYPE html><html><head><title>Debug Info</title><style>body{font-family:monospace;padding:20px;background:#f5f5f5;} .section{background:white;padding:15px;margin:10px 0;border-radius:5px;}</style></head><body>")
+    debug_info.append("<h1>🔧 Debug Information</h1>")
+    
+    # 1. Check database
+    debug_info.append("<div class='section'><h2>📁 Database Status:</h2>")
+    if os.path.exists("database.db"):
+        size = os.path.getsize("database.db")
+        modified = datetime.datetime.fromtimestamp(os.path.getmtime("database.db"))
+        debug_info.append(f"✅ Database exists: {size} bytes")
+        debug_info.append(f"📅 Last modified: {modified}")
+        try:
+            conn = sqlite3.connect("database.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM contacts")
+            count = cursor.fetchone()[0]
+            debug_info.append(f"✅ Contacts count: {count}")
+            
+            cursor.execute("SELECT COUNT(*) FROM chat_messages")
+            chat_count = cursor.fetchone()[0]
+            debug_info.append(f"✅ Chat messages count: {chat_count}")
+            
+            if count > 0:
+                cursor.execute("SELECT * FROM contacts ORDER BY id DESC LIMIT 3")
+                recent = cursor.fetchall()
+                debug_info.append("<br><b>Recent 3 submissions:</b><br>")
+                for r in recent:
+                    debug_info.append(f"  - ID: {r[0]}, Name: {r[1]}, Created: {r[5]}<br>")
+            conn.close()
+        except Exception as e:
+            debug_info.append(f"❌ Database error: {e}")
+    else:
+        debug_info.append("❌ No database file found!")
+    debug_info.append("</div>")
+    
+    # 2. Check email config
+    debug_info.append("<div class='section'><h2>📧 Email Status:</h2>")
+    debug_info.append(f"MAIL_SERVER: {app.config.get('MAIL_SERVER')}<br>")
+    debug_info.append(f"MAIL_PORT: {app.config.get('MAIL_PORT')}<br>")
+    debug_info.append(f"MAIL_USE_TLS: {app.config.get('MAIL_USE_TLS')}<br>")
+    debug_info.append(f"MAIL_USERNAME: {app.config.get('MAIL_USERNAME')}<br>")
+    debug_info.append(f"MAIL_PASSWORD: {'*' * len(str(app.config.get('MAIL_PASSWORD', ''))) if app.config.get('MAIL_PASSWORD') else 'NOT SET'}<br>")
+    debug_info.append("</div>")
+    
+    # 3. Server info
+    debug_info.append("<div class='section'><h2>🖥️ Server Info:</h2>")
+    debug_info.append(f"Running on: {request.host}<br>")
+    debug_info.append(f"Debug mode: {app.debug}<br>")
+    debug_info.append(f"Python version: {os.sys.version}<br>")
+    debug_info.append("</div>")
+    
+    # 4. Available routes
+    debug_info.append("<div class='section'><h2>🔗 Available Routes:</h2>")
+    debug_info.append("<ul>")
+    debug_info.append("<li><a href='/'>🏠 Home</a></li>")
+    debug_info.append("<li><a href='/admin'>🔧 Admin Panel</a></li>")
+    debug_info.append("<li><a href='/view-data'>📊 View Data</a></li>")
+    debug_info.append("<li><a href='/api/contacts'>📡 API: Contacts</a></li>")
+    debug_info.append("<li><a href='/api/chat-messages'>📡 API: Chat Messages</a></li>")
+    debug_info.append("</ul>")
+    debug_info.append("</div>")
+    
+    debug_info.append("</body></html>")
+    
+    return "".join(debug_info)
+
+@app.route("/debug/test-email")
+def test_email():
+    """Test email sending"""
+    try:
+        msg = Message(
+            subject="Test Email from Flask Portfolio",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[app.config['MAIL_USERNAME']]
+        )
+        msg.body = f"""
+Test Email
+
+This is a test email sent from your Flask application at {datetime.datetime.now()}
+
+If you received this, email is working correctly!
+        """
+        mail.send(msg)
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head><title>Email Test</title></head>
+        <body style="font-family: Arial; padding: 20px;">
+            <h1 style="color: green;">✅ Email Sent Successfully!</h1>
+            <p>Check your inbox/spam folder at: {}</p>
+            <hr>
+            <a href="/debug/all">Back to Debug</a>
+        </body>
+        </html>
+        """.format(app.config['MAIL_USERNAME'])
+    except Exception as e:
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Email Test Failed</title></head>
+        <body style="font-family: Arial; padding: 20px;">
+            <h1 style="color: red;">❌ Email Failed</h1>
+            <p><strong>Error:</strong> {str(e)}</p>
+            <hr>
+            <a href="/debug/all">Back to Debug</a>
+        </body>
+        </html>
+        """
 
 # ---------------- ADMIN TEMPLATE (HTML with CRUD Interface) ----------------
 ADMIN_TEMPLATE = """
@@ -555,6 +717,11 @@ ADMIN_TEMPLATE = """
             border-radius: 5px;
             margin-bottom: 15px;
         }
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
     </style>
 </head>
 <body>
@@ -565,9 +732,18 @@ ADMIN_TEMPLATE = """
         <div class="section">
             <h2>📩 Contact Form Submissions</h2>
             <div class="stats">Total: {{ contacts|length }} messages</div>
+            {% if contacts %}
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Created</th><th>Actions</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Message</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for contact in contacts %}
@@ -586,14 +762,23 @@ ADMIN_TEMPLATE = """
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <div class="empty-message">No contact form submissions yet.</div>
+            {% endif %}
         </div>
         
         <div class="section">
             <h2>💬 Chat Messages</h2>
             <div class="stats">Total: {{ chats|length }} messages</div>
+            {% if chats %}
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Message</th><th>Created</th><th>Actions</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Message</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for chat in chats %}
@@ -609,11 +794,15 @@ ADMIN_TEMPLATE = """
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <div class="empty-message">No chat messages yet.</div>
+            {% endif %}
         </div>
         
         <div class="nav">
             <a href="/">🏠 Home</a> | 
-            <a href="/view-data">📊 View Data</a>
+            <a href="/view-data">📊 View Data</a> |
+            <a href="/debug/all">🔧 Debug</a>
         </div>
     </div>
     
@@ -628,7 +817,7 @@ ADMIN_TEMPLATE = """
             if (newName === null) return;
             const newEmail = prompt("Edit email:", email);
             if (newEmail === null) return;
-            const newSubject = prompt("Edit subject:", subject);
+            const newSubject = prompt("Edit subject:", subject === '-' ? '' : subject);
             if (newSubject === null) return;
             const newMessage = prompt("Edit message:", message);
             if (newMessage === null) return;
@@ -651,6 +840,9 @@ ADMIN_TEMPLATE = """
                 } else {
                     alert('Error: ' + data.message);
                 }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
             });
         }
         
@@ -667,6 +859,9 @@ ADMIN_TEMPLATE = """
                     } else {
                         alert('Error: ' + data.message);
                     }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
                 });
             }
         }
@@ -690,6 +885,9 @@ ADMIN_TEMPLATE = """
                 } else {
                     alert('Error: ' + data.message);
                 }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
             });
         }
         
@@ -706,6 +904,9 @@ ADMIN_TEMPLATE = """
                     } else {
                         alert('Error: ' + data.message);
                     }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
                 });
             }
         }
@@ -714,7 +915,7 @@ ADMIN_TEMPLATE = """
 </html>
 """
 
-
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
+    # Run the app
     app.run(debug=True, host='127.0.0.1', port=5000)
